@@ -17,10 +17,6 @@ steps:
     commands:
       - npm config set registry http://$NPM_REGISTRY/
       - npm config set //$NPM_REGISTRY/:_authToken $NPM_TOKEN
-      - npm config get registry
-      - npm config get //$NPM_REGISTRY/:_authToken
-      - cat ~/.npmrc
-      - exit 1
       - apt-get update
       - apt-get install -y build-essential sqlite3 libsqlite3-dev python
       - npm install
