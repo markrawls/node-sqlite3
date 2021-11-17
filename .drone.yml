@@ -7,7 +7,7 @@ platform:
   arch: arm64
 
 steps:
-  - name: Build
+  - name: Publish
     image: node:latest
     environment:
       NPM_REGISTRY:
@@ -24,6 +24,67 @@ steps:
       - make
       - npm run pack
       - npm publish
+
+---
+kind: pipeline
+type: docker
+name: ARM Wheel
+
+platform:
+  os: linux
+  arch: arm64
+
+steps:
+  - name: Build
+    image: node:latest
+    environment:
+      NPM_REGISTRY:
+        from_secret: npm_registry_cache
+      NPM_TOKEN:
+        from_secret: verdaccio_token
+    commands:
+      - npm install -g npm@latest
+      - npm config set registry http://$NPM_REGISTRY/
+      - npm config set //$NPM_REGISTRY/:_authToken $NPM_TOKEN
+      - apt-get update
+      - apt-get install -y build-essential sqlite3 libsqlite3-dev python
+      - npm install
+      - make
+      - npm run pack
+
+  - name: Deploy wheel
+    image: instrumentisto/rsync-ssh
+    environment:
+      PRIVATE_KEY:
+        from_secret: ssh_private_key
+    commands:
+      - echo "$PRIVATE_KEY" >> id_rsa
+      - chmod 600 id_rsa
+      - cd build/stage
+      - rsync -avz -e 'ssh -i ../../id_rsa -o StrictHostKeyChecking=no' --progress ./* root@aricodes.net:/opt/sqlite3/
+
+---
+kind: pipeline
+type: docker
+name: AMD Wheel
+
+steps:
+  - name: Build
+    image: node:latest
+    environment:
+      NPM_REGISTRY:
+        from_secret: npm_registry_cache
+      NPM_TOKEN:
+        from_secret: verdaccio_token
+    commands:
+      - npm install -g npm@latest
+      - npm config set registry http://$NPM_REGISTRY/
+      - npm config set //$NPM_REGISTRY/:_authToken $NPM_TOKEN
+      - apt-get update
+      - apt-get install -y build-essential sqlite3 libsqlite3-dev python
+      - npm install
+      - make
+      - npm run pack
 
   - name: Deploy wheel
     image: instrumentisto/rsync-ssh
