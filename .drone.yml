@@ -12,7 +12,10 @@ steps:
     environment:
       NPM_REGISTRY:
         from_secret: npm_registry_cache
+      NPM_TOKEN:
+        from_secret: verdaccio_token
     commands:
+      - npm config set //$NPM_REGISTRY/:authToken $NPM_TOKEN
       - apt-get update
       - apt-get install -y build-essential sqlite3 libsqlite3-dev python
       - npm install
