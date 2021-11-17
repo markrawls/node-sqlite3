@@ -12,24 +12,15 @@ steps:
     environment:
       NPM_REGISTRY:
         from_secret: npm_registry_cache
+      NPM_TOKEN:
+        from_secret: verdaccio_token
     commands:
       - apt-get update
       - apt-get install -y build-essential sqlite3 libsqlite3-dev python
       - npm install
       - make
       - npm run pack
-
-  - name: Publish to Verdaccio
-    image: plugins/npm
-    settings:
-      username:
-        from_secret: verdaccio_username
-      password:
-        from_secret: verdaccio_password
-      email:
-        from_secret: verdaccio_email
-      registry:
-        from_secret: npm_registry_cache
+      - npm publish
 
   - name: Deploy wheel
     image: instrumentisto/rsync-ssh
