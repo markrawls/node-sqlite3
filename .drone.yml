@@ -12,9 +12,9 @@ steps:
     environment:
       NPM_REGISTRY:
         from_secret: npm_registry_cache
-      NPM_USERNAME:
+      NPM_USER:
         from_secret: verdaccio_username
-      NPM_PASSWORD:
+      NPM_PASS:
         from_secret: verdaccio_password
       NPM_EMAIL:
         from_secret: verdaccio_email
